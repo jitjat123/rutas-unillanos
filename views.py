@@ -1,7 +1,8 @@
-from flask import jsonify
+from flask import jsonify, request
 from flask_restful import Resource, reqparse
 from models import Parada,Hora,Bus,Ruta,Usuario,db
-
+from app import app
+from datetime import datetime
 
 # Definir una vista de RESTful para el modelo Parada
 class ParadaResource(Resource):
@@ -108,3 +109,43 @@ class UsuarioResource(Resource):
         db.session.add(usuario)
         db.session.commit()
         return {'message': 'Usuario creado', 'id': usuario.id}, 201
+    
+
+# Funcion para valores de parada
+@app.route('/horasiguiente', methods=['POST'])
+def Horasiguiente():
+    id = request.json.get('id', None)
+    hora = request.json.get('hora', None)
+    rutas = Ruta.query.all()
+    parada = Parada.query.filter_by(id=id).first()
+    rutafin = None
+    hora_minima=None
+    horita=None
+    hora = datetime.strptime(hora, '%H:%M:%S').time()
+    if parada:
+        for ruta in rutas:
+            actualhora = Hora.query.filter_by(id=ruta.hora_id).first()
+            if ruta.parada_id == parada.id and actualhora.hora >= hora:
+                if hora_minima is None or hora_minima >= actualhora.hora:
+                    hora_minima=actualhora.hora
+                    rutafin=ruta
+
+            if ruta.parada_id == parada.id and actualhora.hora <= hora:
+                if horita is None or horita >= actualhora.hora:
+                    horita=actualhora.hora
+                    ultimaruta=ruta
+        
+        if rutafin is None:
+            rutafin = ultimaruta
+
+        busF=Bus.query.filter_by(id=rutafin.bus_id).first()
+        horaF=Hora.query.filter_by(id=rutafin.hora_id).first()
+
+
+        return jsonify({'parada': parada.nombre, 'bus': busF.placa, 'hora': str(horaF.hora), 'longitud': parada.longitud, 'latitud': parada.latitud})
+    else:
+        return {'message': 'Parada no encontrada'}, 404
+
+
+
+    

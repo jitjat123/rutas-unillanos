@@ -16,13 +16,23 @@ class Parada(db.Model):
     latitud = db.Column(db.Float)
     longitud = db.Column(db.Float)
 
+    def __repr__(self):
+        return f'<{self.nombre}>'
+
 class Bus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     placa = db.Column(db.String(10))
 
+    def __repr__(self):
+        return f'<{self.placa}>'
+
 class Hora(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     hora = db.Column(db.Time)
+
+    def __repr__(self):
+        return f'<{self.hora}>'
+    
 
 class Ruta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +45,9 @@ class Ruta(db.Model):
     bus = db.relationship('Bus', backref=db.backref('rutas', lazy=True))
     hora = db.relationship('Hora', backref=db.backref('rutas', lazy=True))
 
+    def __repr__(self):
+        return f'<Ruta {self.nombre}>'
+
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     usuario = db.Column(db.String(50), unique=True, nullable=False)
@@ -42,7 +55,7 @@ class Usuario(db.Model):
     tipo = db.Column(db.String(15), nullable=True)
 
     def __repr__(self):
-        return f'<User {self.usuario}>'
+        return f'<Usuario {self.usuario}>'
 
     def set_password(self, password):
         self.password = generate_password_hash(password)

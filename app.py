@@ -4,6 +4,7 @@ from models import Usuario,db
 import os
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
@@ -16,7 +17,9 @@ def create_app():
 
     return app
 
+
 app = create_app()
+CORS(app, resources={r"/*": {"origins": "*"}})
 #Configuracion login
 app.secret_key = 'secret_key'
 app.config['JWT_SECRET_KEY'] = 'jwt_secret_key'
