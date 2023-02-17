@@ -3,14 +3,16 @@ from flask_restful import Resource, reqparse
 from models import Parada,Hora,Bus,Ruta,Usuario,db
 from app import app
 from datetime import datetime
-
+from flask_jwt_extended import jwt_required
 # Definir una vista de RESTful para el modelo Parada
+
 class ParadaResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('nombre', type=str, required=True, help='Nombre de la parada es requerido')
     parser.add_argument('latitud', type=float, required=True, help='Latitud de la parada es requerido')
     parser.add_argument('longitud', type=float, required=True, help='Longitud de la parada es requerido')
 
+    @jwt_required()
     def get(self, id):
         parada = Parada.query.filter_by(id=id).first()
         if parada:
@@ -18,6 +20,7 @@ class ParadaResource(Resource):
         else:
             return {'message': 'Parada no encontrada'}, 404
 
+    @jwt_required()
     def post(self):
         data = ParadaResource.parser.parse_args()
         parada = Parada(nombre=data['nombre'], latitud=data['latitud'], longitud=data['longitud'])
@@ -31,6 +34,7 @@ class BusResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('placa', type=str, required=True, help='Placa del bus es requerida')
 
+    @jwt_required()
     def get(self, id):
         bus = Bus.query.filter_by(id=id).first()
         if bus:
@@ -38,6 +42,7 @@ class BusResource(Resource):
         else:
             return {'message': 'Bus no encontrado'}, 404
 
+    @jwt_required()
     def post(self):
         data = BusResource.parser.parse_args()
         bus = Bus(placa=data['placa'])
@@ -51,6 +56,7 @@ class HoraResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('hora', type=str, required=True, help='Hora es requerida')
 
+    @jwt_required()
     def get(self, id):
         hora = Hora.query.filter_by(id=id).first()
         if hora:
@@ -58,6 +64,7 @@ class HoraResource(Resource):
         else:
             return {'message': 'Hora no encontrada'}, 404
 
+    @jwt_required()
     def post(self):
         data = HoraResource.parser.parse_args()
         hora = Hora(hora=data['hora'])
@@ -74,6 +81,7 @@ class RutaResource(Resource):
     parser.add_argument('bus_id', type=int, required=True, help='ID del bus es requerido')
     parser.add_argument('hora_id', type=int, required=True, help='ID de la hora es requerido')
 
+    @jwt_required()
     def get(self, id):
         ruta = Ruta.query.filter_by(id=id).first()
         if ruta:
@@ -81,6 +89,7 @@ class RutaResource(Resource):
         else:
             return {'message': 'Ruta no encontrada'}, 404
 
+    @jwt_required()
     def post(self):
         data = RutaResource.parser.parse_args()
         ruta = Ruta(nombre=data['nombre'], parada_id=data['parada_id'], bus_id=data['bus_id'], hora_id=data['hora_id'])
@@ -96,6 +105,7 @@ class UsuarioResource(Resource):
     parser.add_argument('contraseña', type=int, required=True, help='Contraseña del usuario es requerido')
     parser.add_argument('tipo', type=int, required=True, help='TIPO de usuario es requerido')
 
+    @jwt_required()
     def get(self, id):
         usuario = Usuario.query.filter_by(id=id).first()
         if usuario:
@@ -103,6 +113,7 @@ class UsuarioResource(Resource):
         else:
             return {'message': 'Usuario no encontrado'}, 404
 
+    @jwt_required()
     def post(self):
         data = RutaResource.parser.parse_args()
         usuario = Ruta(usuario=data['usuario'], contraseña=data['contraseña'], tipo=data['tipo'])
@@ -113,6 +124,7 @@ class UsuarioResource(Resource):
 
 # Funcion para valores de parada
 @app.route('/horasiguiente', methods=['POST'])
+@jwt_required()
 def Horasiguiente():
     id = request.json.get('id', None)
     hora = request.json.get('hora', None)

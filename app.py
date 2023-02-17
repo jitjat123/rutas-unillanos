@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_login import LoginManager
 from models import Usuario,db
 import os
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 
@@ -71,6 +71,7 @@ def login():
     return jsonify(access_token=access_token), 200
 
 @app.route('/protected', methods=['GET'])
-@jwt_required
+@jwt_required()
 def protected():
-    return jsonify({"msg": "You are authorized to access this endpoint."}), 200
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
