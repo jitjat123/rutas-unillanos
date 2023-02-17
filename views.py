@@ -158,6 +158,26 @@ def Horasiguiente():
     else:
         return {'message': 'Parada no encontrada'}, 404
 
+@app.route('/rutaproxima', methods=['POST'])
+@jwt_required()
+def Rutaproxima():
+    hora = request.json.get('hora', None)
+    hora = datetime.strptime(hora, '%H:%M:%S').time()
+    rutas = Ruta.query.all()
+    hora_minima=None
+    rutafin = None
+    for ruta in rutas:
+        actualhora = Hora.query.filter_by(id=ruta.hora_id).first()
+        if actualhora.hora >= hora:
+            if hora_minima is None or hora_minima >= actualhora.hora:
+                hora_minima=actualhora.hora
+                rutafin=ruta
+    rutas_finales = Ruta.query.filter_by(hora_id=rutafin.hora_id).all()
+    rutas_json = [{'paradas':Parada.query.filter_by(id=ruta_final.parada_id).first().nombre,
+                   'bus':Bus.query.filter_by(id=ruta_final.bus_id).first().placa,
+                   'hora':str(Hora.query.filter_by(id=rutafin.hora_id).first().hora),
+                   'longitud':Parada.query.filter_by(id=ruta_final.parada_id).first().longitud,
+                   'latitud':Parada.query.filter_by(id=ruta_final.parada_id).first().latitud
+                   } for ruta_final in rutas_finales]
+    return jsonify(rutas_json)
 
-
-    
